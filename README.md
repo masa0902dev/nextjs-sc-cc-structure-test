@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SCとCCの設計 masaの案
+## 要約
+- 結局、上の方の親でfetchするしかなかった。（考えてみると、そもそもuseStateは変化と同階層に置かないと管理できないので仕方がなし）
+  - Compositionパターンでは（親CC,子SC,孫CCで、）子SCが生成して孫CCで変化するstateを親CCで取得できなかった。よって不可。
+  - Compositionでの悩みをuseContext, Provider使って解決できるかと思ったがダメ。
 
-## Getting Started
 
-First, run the development server:
+## テスト結果
+下記の構造でテストして、ドラッグ&ドロップは無しで、左側アイテムをクリックしたら右側アイテムにちゃんと更新される（逆も然り）のを確認した。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 登場人物(コンポーネント)
+- Container：fetchを担当。SC
+- ClientParser：CCをラップして、SCを作り出すためのもの。今回はここをParser(値を変換したりする)にしている。SC
+- DndContext：ドラッグ&ドロップのために必要。CC
+- Presenter：値の表示を担当する。CC。今回はここでuse()を使う！([reactのuse-hook](https://react.dev/reference/react/use#streaming-data-from-server-to-client))→→→使えなかった。個別のSuspense（ローディングUI）はもう諦めてもいいかも
+
+
+## 構造
+疑似コードで説明。本質以外は省略している。  
+（これらの階層にデザイン要件でさらに階層を挟むことも可能）
+
+第一階層：SC
+```ts
+export const Page = () => {
+  return (
+    <Box>
+      {/* 他のコンポーネントはここの階層に */} 
+      <Container />
+    </Box>
+  )
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+第二階層：SC
+```ts
+export const Container = () => {
+  // awaitしない！！！これは第四階層のuse()によってコンポーネントごとのSuspense（ローディングUI）を実現するため
+  const articlesLeft = fetchArticlesLeft()
+  const articlesRight = fetchArticlesRight()
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+  return (
+    <ClientParser left={articlesLeft} right={articlesRight} />
+  )
+}
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+const fetchArticlesLeft = async () => {
+  /*
+    1. fetch
+    2. articlesにプロパティを追加して返す
+        position: "left"
+        inDB: true,
+  */
+}
+const fetchArticlesRight = async () => {
+  /*
+    1. fetch
+    2. articlesにプロパティを追加して返す
+        position: "right",
+        inDB: false,
+  */
+}
+```
 
-## Learn More
+第三階層：CC
+```ts
+"use client"
 
-To learn more about Next.js, take a look at the following resources:
+export const ClientParser = ({ left, right }) => {
+  // 右側記事に左側記事と重複があれば、右側記事から削除する。そして1つの配列にする
+  const tmpArticles = mergeWithoutRightDuplication(left, right)
+  // set関数で処理するために1つのstateにまとめる。left,rightの記事はプロパティの`position`で区別
+  const [articles, setArticles] = useState(tmpArticles)
+  // left, rightでそれぞれPresenterに渡す（useStateを元にした変数は、再レンダリングのたびに再計算される）
+  const leftArticles = articles.filter((article) => article.position === "left");
+  const rightArticles = articles.filter((article) => article.position === "right");
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+  // Dndによって対象articleの position を更新する処理
+  const handleArticles = (event) => {};
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  return (
+    <div>
+      <DndContext onDragEnd={handleArticles}>
+        <Presenter position={"left"} articles={leftArticles} />
+        <Presenter position={"right"} articles={rightArticles} />
+      </DndContext>
+      {/* 左画面にある記事のDBへの保存を担うコンポーネント: inDBがfalseだけを保存 */}
+      <SaveButtons rightArticles={rightArticles} />
+    </div>
+  )
+}
 
-## Deploy on Vercel
+// O(N+M)で処理
+const mergeWithoutRightDuplication = (left: { link: string }[], right: { link: string }[]) => {
+  const leftLinks = new Set(left.map((item) => item.link));
+  right = right.filter((item) => !leftLinks.has(item.link));
+  return [...left, ...right];
+};
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+第4階層：CC
+```ts
+export const Presenter = ({ position, articles }) => {
+  // taskAppのColumnに当たるところ。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+  // use()が使えなかった。個別のSuspense（ローディングUI）はもう諦めてもいいかも
+  // 使えなかった理由は、
+}
+```
