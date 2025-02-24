@@ -20,7 +20,7 @@ const ClientParser: FC<Props1> = ({ left, right }) => {
   const leftToPass: PendingOrFulfilled = getArticlesToPass(left, "left", articlesSet);
   const rightToPass: PendingOrFulfilled = getArticlesToPass(right, "right", articlesSet);
 
-  const InitiallyPushArticles = (articles: Article[]) => {
+  const initiallyPushArticles = (articles: Article[]) => {
     setArticles((prev) => {
       let newArticles = [...prev, ...articles];
       newArticles = mergeWithoutRightDuplication(newArticles);
@@ -71,7 +71,7 @@ const ClientParser: FC<Props1> = ({ left, right }) => {
                   position={position}
                   articlesPromise={position === "left" ? leftToPass : rightToPass}
                   moveArticle={moveArticle}
-                  pushArticles={InitiallyPushArticles}
+                  initiallyPushArticles={initiallyPushArticles}
                 />
               </Suspense>
             </div>

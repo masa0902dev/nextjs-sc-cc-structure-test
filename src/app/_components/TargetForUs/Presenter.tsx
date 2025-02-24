@@ -1,34 +1,33 @@
-import React, { FC, useEffect, useState, use } from "react";
+import React, { FC, useEffect, use, useState } from "react";
 import { Article } from "@/app/types.d";
 
 type Props2 = {
   position: string;
   articlesPromise: Promise<Article[]> | Article[];
   moveArticle: (article: Article) => void;
-  pushArticles: (articles: Article[]) => void;
+  initiallyPushArticles: (articles: Article[]) => void;
 };
 
 export const Presenter: FC<Props2> = ({
   position,
   articlesPromise,
   moveArticle,
-  pushArticles,
+  initiallyPushArticles,
 }) => {
-  // `useEffect` が完了するまでは `null` にする
-  const [articles, setArticles] = useState<Article[] | null>(null);
+  // Suspense のためにPromiseをuse()で解決
+  const articles =
+    articlesPromise instanceof Promise ? use(articlesPromise) : articlesPromise;
 
+  // initializedは初回のinitiallyPushArticles実行を記録し、useEffectの2回目以降の実行を防ぐ
+  const [initialized, setInitialized] = useState(false);
   useEffect(() => {
-    const resolvedArticles =
-      articlesPromise instanceof Promise ? use(articlesPromise) : articlesPromise;
+    if (!initialized) {
+      initiallyPushArticles(articles);
+      setInitialized(true);
+    }
+  }, [articles, initiallyPushArticles, initialized]);
 
-    pushArticles(resolvedArticles);
-    setArticles(resolvedArticles);
-  }, []); // 初回のみ実行
-
-  // `articles` が `null` の間はレンダリングしない
-  if (!articles) {
-    return null;
-  }
+  if (!initialized) return null;
 
   return (
     <div>

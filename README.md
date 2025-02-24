@@ -9,6 +9,8 @@
 ## テスト結果
 下記の構造でテストして、ドラッグ&ドロップは無しで、左側アイテムをクリックしたら右側アイテムにちゃんと更新される（逆も然り）のを確認した。
 
+DndContext使っても同様に実装できるはず。
+
 ## 登場人物(コンポーネント)
 - Page：ページコンポーネントそのもの。SC
 - Container：fetchを担当。SC
@@ -40,7 +42,11 @@ ClientParser, Presenterレイヤーでかなり特殊なことをやっている
 
 3. Presenterで値を表示。  
 ただし、最初に受け取った値(fetchされて渡ってきた値, Promise)にはuse()を使って、各コンポーネントでのローディングUIを実現する。  
-最初に受け取った値の場合は、イベントハンドラInitiallyPushArticles()を使ってuseState管理されている記事の変数を更新。すると、そのuseStateを使っているコンポーネント(ClientParser)全体が再計算される。その際に記事の変数leftToPass,rightToPassが更新され、Articleのプロパティpositionのleft,rightによってleftToPass,rightToPassは表示すべき記事のみを受け取る。  
+最初に受け取った値の場合は、イベントハンドラinitiallyPushArticles()を使ってuseState管理されている記事の変数を更新。すると、そのuseStateを使っているコンポーネント(ClientParser)全体が再計算される。その際に記事の変数leftToPass,rightToPassが更新され、Articleのプロパティpositionのleft,rightによってleftToPass,rightToPassは表示すべき記事のみを受け取る。  
 そして、記事がそれぞれのPresenterの中で表示される。
 
-*ClientParser, Presenterでやっていることの性質上、場合によっては一瞬だけ重複している記事が画面右に見えることがある。（）
+~~*ClientParser, Presenterでやっていることの性質上、場合によっては一瞬だけ重複している記事が画面右に見えることがある。何かうまい方法を思いついたら教えて欲しい~~
+
+「一瞬だけ重複している記事が画面右に見えることがある」を修正。  
+最初に受け取った値の場合はreturn nullにすることで、重複を含むコンポーネントをレンダリングしない。useEffectはレンダリング後に呼ばれる。useEffect内でinitiallyPushArticles()を実行して結果的に重複が取り除かれた値を取得し、表示する。  
+useStateのinitializedはuseEffectの2回目以降の実行を防ぐ・初回時のreturn nullをトリガーするためにフラグとして使っている。
