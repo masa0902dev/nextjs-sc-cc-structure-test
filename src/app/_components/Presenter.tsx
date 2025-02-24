@@ -19,13 +19,13 @@ export const Presenter: FC<Props2> = ({
 
   useEffect(() => {
     pushArticles(articles);
-    // 依存配列を空にして、初回レンダリング時にのみ発火
+    // 依存配列を空にして、初回レンダリング時にのみ発火。依存配列入れると無限ループ
     // 今回は重複無しだが、重複ありでも問題なかった
   }, []);
 
   return (
     <div style={{ marginBottom: "2rem" }}>
-      <div>{position}</div>
+      <h4>{position}: CC</h4>
       {articles.map((article: Article) => (
         <div key={article.link}>
           <label>

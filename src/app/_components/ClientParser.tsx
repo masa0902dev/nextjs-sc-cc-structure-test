@@ -45,7 +45,9 @@ const ClientParser: FC<Props1> = ({ left, right }) => {
 
   return (
     <div>
+      <h2>ClientParser: CC</h2>
       <div style={{ display: "flex", gap: "2rem" }}>
+        {/* ここをmapで表示したら重複出る場合＆key duplication出る場合があった。 */}
         <div style={{ height: "50vh", overflowY: "scroll" }}>
           <Suspense fallback={<div>Loading...</div>}>
             <Presenter
@@ -75,14 +77,12 @@ export default ClientParser;
 
 const mergeWithoutRightDuplication = (articles: Article[]) => {
   const leftLinks = new Set();
-  const mergedArticles = articles.reduce((acc: Article[], article: Article) => {
+  // filter: trueなら追加、falseなら追加しない
+  return articles.filter((article) => {
     if (article.position === "left") {
       leftLinks.add(article.link);
-      acc.push(article);
-    } else if (!leftLinks.has(article.link)) {
-      acc.push(article);
+      return true;
     }
-    return acc;
-  }, []);
-  return mergedArticles;
+    return !leftLinks.has(article.link);
+  });
 };
