@@ -1,4 +1,4 @@
-import React, { FC, useEffect, use } from "react";
+import React, { FC, useEffect, useState, use } from "react";
 import { Article } from "@/app/types.d";
 
 type Props2 = {
@@ -14,15 +14,21 @@ export const Presenter: FC<Props2> = ({
   moveArticle,
   pushArticles,
 }) => {
-  const articles =
-    articlesPromise instanceof Promise ? use(articlesPromise) : articlesPromise;
+  // `useEffect` が完了するまでは `null` にする
+  const [articles, setArticles] = useState<Article[] | null>(null);
 
   useEffect(() => {
-    pushArticles(articles);
-    // 依存配列を空にして、初回レンダリング時にのみ発火。依存配列入れると無限ループ
-    // 右側アイテムの重複ありでも無しでも問題なかった。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const resolvedArticles =
+      articlesPromise instanceof Promise ? use(articlesPromise) : articlesPromise;
+
+    pushArticles(resolvedArticles);
+    setArticles(resolvedArticles);
+  }, []); // 初回のみ実行
+
+  // `articles` が `null` の間はレンダリングしない
+  if (!articles) {
+    return null;
+  }
 
   return (
     <div>

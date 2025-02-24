@@ -20,6 +20,14 @@ const ClientParser: FC<Props1> = ({ left, right }) => {
   const leftToPass: PendingOrFulfilled = getArticlesToPass(left, "left", articlesSet);
   const rightToPass: PendingOrFulfilled = getArticlesToPass(right, "right", articlesSet);
 
+  const InitiallyPushArticles = (articles: Article[]) => {
+    setArticles((prev) => {
+      let newArticles = [...prev, ...articles];
+      newArticles = mergeWithoutRightDuplication(newArticles);
+      return newArticles;
+    });
+  };
+
   const moveArticle = (article: Article) => {
     setArticles((prev) => {
       return prev.map((item) =>
@@ -27,14 +35,6 @@ const ClientParser: FC<Props1> = ({ left, right }) => {
           ? { ...item, position: item.position === "left" ? "right" : "left" }
           : item
       );
-    });
-  };
-
-  const InitiallyPushArticles = (articles: Article[]) => {
-    setArticles((prev) => {
-      let newArticles = [...prev, ...articles];
-      newArticles = mergeWithoutRightDuplication(newArticles);
-      return newArticles;
     });
   };
 
@@ -50,6 +50,7 @@ const ClientParser: FC<Props1> = ({ left, right }) => {
     <div style={{ border: "2px solid green", padding: "1rem" }}>
       <h3>ClientParser: CC</h3>
       <div style={{ display: "flex", gap: "2rem" }}>
+        {/* ←ここにDndContextを入れ込むことになると思う。その子コンポーネントが下の奴ら↓ */}
         {["left", "right"].map((position) => {
           const boxStyle = {
             width: "150px",
@@ -100,8 +101,10 @@ const getArticlesToPass = (
   position: string,
   articles: Article[]
 ) => {
+  if (articles.length === 0) return leftOrRightArticles;
+
   let articlesToPass = leftOrRightArticles;
-  // @ts-expect-error: existing
+  // @ts-expect-error: existing (fulfilledはPromiseが解決された状態。解決されていない状態はpending)
   if (leftOrRightArticles.status === "fulfilled") {
     articlesToPass = articles.filter((article: Article) => article.position === position);
   }
