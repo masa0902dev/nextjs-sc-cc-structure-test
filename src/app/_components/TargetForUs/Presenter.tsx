@@ -1,5 +1,5 @@
 import React, { FC, useEffect, use } from "react";
-import { Article } from "@/_context/types";
+import { Article } from "@/app/types.d";
 
 type Props2 = {
   position: string;
@@ -7,6 +7,7 @@ type Props2 = {
   moveArticle: (article: Article) => void;
   pushArticles: (articles: Article[]) => void;
 };
+
 export const Presenter: FC<Props2> = ({
   position,
   articlesPromise,
@@ -15,22 +16,21 @@ export const Presenter: FC<Props2> = ({
 }) => {
   const articles =
     articlesPromise instanceof Promise ? use(articlesPromise) : articlesPromise;
-  // const isPushed = useRef(false); // 初回の `pushArticles` 実行を記録
 
   useEffect(() => {
     pushArticles(articles);
     // 依存配列を空にして、初回レンダリング時にのみ発火。依存配列入れると無限ループ
-    // 今回は重複無しだが、重複ありでも問題なかった
+    // 右側アイテムの重複ありでも無しでも問題なかった。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div style={{ marginBottom: "2rem" }}>
+    <div>
       <h4>{position}: CC</h4>
       {articles.map((article: Article) => (
         <div key={article.link}>
           <label>
-            {article.link}
-            <button onClick={() => moveArticle(article)}>Switch</button>
+            {article.link} <button onClick={() => moveArticle(article)}>Switch</button>
           </label>
         </div>
       ))}
