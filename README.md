@@ -1,8 +1,12 @@
 # SCとCCの設計 masaの案
+CC -> client conponent  
+SC -> server component
+
 ## 要約
 - 結局、末端でfetchするのでは不可能だった。（考えてみると、そもそもuseStateは変化と同階層に置かないと管理できないので仕方がなし）
-  - Compositionパターンでは（親CC,子SC,孫CCで、）子SCが生成して孫CCで変化するstateを親CCで取得できなかった。よって不可。
+  - Compositionパターンでは（親CC,子SC,孫CCで、）子SCでfetchして孫CCで変化するstateを親CCで取得できなかった。よって不可。
   - Compositionでの悩みをuseContext, Provider使って解決できるかと思ったがダメ。
+    - (追記：CompositionとuseContext,Provider組み合わせれば実現できそう（親CCでProvider呼ぶ,useState管理->子SCでフェッチ→孫CCでユーザ操作により変化する）。今のSC-CC-CCがCC-SC-CCになるが、今の親SC(Container)では特にコンポーネントをレンダリングしてないので特に悪くない。もしUI要件/機能要件で現在の三階層より深くなる場合、Providerを使うメリットが上回るだろう。)
 - 下から3つ目の階層(Container)でSCとしてfetchしている。
 
 
@@ -50,3 +54,9 @@ ClientParser, Presenterレイヤーでかなり特殊なことをやっている
 「一瞬だけ重複している記事が画面右に見えることがある」を修正。  
 最初に受け取った値の場合はreturn nullにすることで、重複を含むコンポーネントをレンダリングしない。useEffectはレンダリング後に呼ばれる。useEffect内でinitiallyPushArticles()を実行して結果的に重複が取り除かれた値を取得し、表示する。  
 useStateのinitializedはuseEffectの2回目以降の実行を防ぐ・初回時のreturn nullをトリガーするためにフラグとして使っている。
+
+### CCからのPOSTやPATCH
+saveButton(CC)でPOSTのfetch実行。Articleのプロパティposition, inDBからPOSTのbodyに含めるかを判断している。  
+→→→ nextjsのServer Actionsを使えばSCのように効率化できるかも: [ユーザー操作とデータフェッチ](https://zenn.dev/akfm/books/nextjs-basic-principle/viewer/part_1_interactive_fetch)
+
+- [ ] Server Actionsを試す
