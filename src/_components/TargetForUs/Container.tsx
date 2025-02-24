@@ -1,4 +1,4 @@
-import ClientParser from "@/app/_components/TargetForUs/ClientParser";
+import ClientParser from "@/_components/TargetForUs/ClientParser";
 
 const Container = () => {
   // use()を使うのでawaitしない！！！

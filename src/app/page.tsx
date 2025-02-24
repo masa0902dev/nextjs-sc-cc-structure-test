@@ -1,6 +1,6 @@
 import React from "react";
-import Header from "./_components/Header";
-import Container from "@/app/_components/TargetForUs/Container";
+import Header from "@/_components/Header";
+import Container from "@/_components/TargetForUs/Container";
 
 const Page = () => {
   return (

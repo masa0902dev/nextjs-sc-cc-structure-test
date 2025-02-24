@@ -1,8 +1,8 @@
 "use client";
 import { FC, useState, Suspense } from "react";
 import type { Article } from "@/app/types.d";
-import { Presenter } from "@/app/_components/TargetForUs/Presenter";
-import { SaveButtons } from "@/app/_components/TargetForUs/SaveButton";
+import { Presenter } from "@/_components/TargetForUs/Presenter";
+import { SaveButtons } from "@/_components/TargetForUs/SaveButton";
 
 type Props1 = {
   left: Promise<Article[]>;
