@@ -1,12 +1,12 @@
-import React, { FC, useEffect, use, useState } from "react";
-import { Article } from "@/app/types.d";
+import { Article } from "@/app/types.d"
+import { FC, use, useEffect, useState } from "react"
 
 type Props2 = {
-  position: string;
-  articlesPromise: Promise<Article[]> | Article[];
-  moveArticle: (article: Article) => void;
-  initiallyPushArticles: (articles: Article[]) => void;
-};
+  position: string
+  articlesPromise: Promise<Article[]> | Article[]
+  moveArticle: (article: Article) => void
+  initiallyPushArticles: (articles: Article[]) => void
+}
 
 export const Presenter: FC<Props2> = ({
   position,
@@ -16,18 +16,18 @@ export const Presenter: FC<Props2> = ({
 }) => {
   // Suspense のためにPromiseをuse()で解決
   const articles =
-    articlesPromise instanceof Promise ? use(articlesPromise) : articlesPromise;
+    articlesPromise instanceof Promise ? use(articlesPromise) : articlesPromise
 
   // initializedは初回のinitiallyPushArticles実行を記録し、useEffectの2回目以降の実行を防ぐ
-  const [initialized, setInitialized] = useState(false);
+  const [initialized, setInitialized] = useState(false)
   useEffect(() => {
     if (!initialized) {
-      initiallyPushArticles(articles);
-      setInitialized(true);
+      initiallyPushArticles(articles)
+      setInitialized(true)
     }
-  }, [articles, initiallyPushArticles, initialized]);
+  }, [articles, initiallyPushArticles, initialized])
 
-  if (!initialized) return null;
+  if (!initialized) return null
 
   return (
     <div>
@@ -40,5 +40,5 @@ export const Presenter: FC<Props2> = ({
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
