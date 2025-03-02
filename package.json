@@ -6,21 +6,38 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "format": "prettier --write . && echo '\nPrettier Finished'",
+    "lint:es": "next lint --fix && echo '\nESLint Finished'",
+    "lint:style": "stylelint --fix --allow-empty-input \"**/*.{css,scss}\" && echo 'StyleLint Finished'",
+    "check": "npm run format && npm run lint:es && npm run lint:style"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "next": "15.1.7",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^6.3.0"
   },
   "devDependencies": {
+    "eslint-config-next": "15.1.7",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
     "eslint": "^9",
-    "eslint-config-next": "15.1.7",
-    "typescript": "^5"
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-define-config": "^2.1.0",
+    "eslint-plugin-next": "^0.0.0",
+    "prettier": "^3.4.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "sass": "^1.83.0",
+    "stylelint": "^16.12.0",
+    "stylelint-config-prettier-scss": "^1.0.0",
+    "stylelint-config-standard-scss": "^14.0.0",
+    "typescript": "^5.7.2"
   }
 }

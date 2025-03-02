@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    // formatter, linter
+    "esbenp.prettier-vscode",
+    "stylelint.vscode-stylelint",
+    "dbaeumer.vscode-eslint",
+    // display errors in the editor
+    "usernamehw.errorlens",
+    // display inline-comment annotations in sidebar
+    "Gruntfuggly.todo-tree",
+    // highlight 全角スペース
+    "mosapride.zenkaku"
+  ]
+}
