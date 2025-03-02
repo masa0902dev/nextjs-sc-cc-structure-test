@@ -1,14 +1,13 @@
 import { NextRequest } from "next/server"
 
 export async function GET(req: NextRequest) {
-  // await new Promise((resolve) => setTimeout(resolve, 1000));
-
   const articles = []
 
   const searchParams = req.nextUrl.searchParams
   const type = searchParams.get("type")
 
   if (type === "left") {
+    await new Promise((resolve) => setTimeout(resolve, 2000))
     for (let i = 0; i < 20; i++) {
       articles.push({
         link: `link${i}`,
